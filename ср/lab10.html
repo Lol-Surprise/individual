@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Однорукий бандит</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .slot-machine {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .slot {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #333;
+            font-size: 24px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Гра «Однорукий бандит»</h1>
+    <div class="slot-machine" id="slotMachine">
+    </div>
+    <button class="button" id="spinButton">Крутити</button>
+    <button class="button" id="restartButton" style="display: none;">Грати ще раз</button>
+    <div class="result" id="result"></div>
+
+    <script>
+        const symbols = ['🍒', '🍋', '🍉', '⭐', '🔔', '🍇'];
+        const slotMachine = document.getElementById('slotMachine');
+        const spinButton = document.getElementById('spinButton');
+        const restartButton = document.getElementById('restartButton');
+        const resultDiv = document.getElementById('result');
+        let playerName = prompt("Введіть своє ім'я:");
+        alert(`Ласкаво просимо до гри, ${playerName}! У вас є 3 спроби.`);
+        let attempts = 0;
+        const slots = [];
+        for (let i = 0; i < 9; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+            slot.textContent = '🍒';
+            slotMachine.appendChild(slot);
+            slots.push(slot);
+        }
+        function getRandomSymbol(exclude) {
+            const availableSymbols = symbols.filter(symbol => !exclude.includes(symbol));
+            const randomIndex = Math.floor(Math.random() * availableSymbols.length);
+            return availableSymbols[randomIndex];
+        }
+        function checkWin(currentSymbols) {
+            for (let i = 0; i < 9; i += 3) {
+                const rowSymbols = [currentSymbols[i], currentSymbols[i + 1], currentSymbols[i + 2]];
+                if (new Set(rowSymbols).size === 1) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        function spinSlots() {
+            attempts++;
+            const currentSymbols = [];
+            for (let col = 0; col < 3; col++) {
+                const columnSymbols = [];
+                for (let row = 0; row < 3; row++) {
+                    const slotIndex = row * 3 + col;
+                    const symbol = getRandomSymbol(columnSymbols);
+                    slots[slotIndex].textContent = symbol;
+                    currentSymbols[slotIndex] = symbol;
+                    columnSymbols.push(symbol);
+                }
+            }
+            if (checkWin(currentSymbols)) {
+                resultDiv.textContent = `Вітаємо, ${playerName}! Ви виграли!`;
+                spinButton.disabled = true;
+                restartButton.style.display = 'inline';
+            } else if (attempts >= 3) {
+                resultDiv.textContent = `На жаль, ${playerName}, ви програли. Спробуйте ще раз!`;
+                spinButton.disabled = true;
+                restartButton.style.display = 'inline';
+            } else {
+                resultDiv.textContent = `Спробуйте ще раз! У вас залишилося ${3 - attempts} спроб.`;
+            }
+        }
+        function restartGame() {
+            attempts = 0;
+            spinButton.disabled = false;
+            restartButton.style.display = 'none';
+            resultDiv.textContent = '';
+            slots.forEach(slot => (slot.textContent = '🍒'));
+        }
+        spinButton.addEventListener('click', spinSlots);
+        restartButton.addEventListener('click', restartGame);
+    </script>
+</body>
+</html>

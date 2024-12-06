@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>В кого більше число</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .game-container {
+      text-align: center;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      color: #2e3d49;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .score {
+      margin: 20px 0;
+      font-size: 1.5rem;
+      color: #4caf50;
+      font-weight: bold;
+    }
+
+    .message {
+      font-size: 1.2rem;
+      margin: 20px;
+      color: #333;
+    }
+
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 200px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .reset-btn {
+      background-color: #ff6347;
+    }
+
+    .reset-btn:hover {
+      background-color: #ff5031;
+    }
+
+    .numbers-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 30px;
+    }
+
+    .number-circle {
+      width: 60px;
+      height: 60px;
+      background-color: #2196F3;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s ease-in-out;
+    }
+
+    .number-circle.visible {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <h1>В кого більше число?</h1>
+    <div class="score">
+      <span>Перемоги користувача: <span id="userWins">0</span></span><br>
+      <span>Перемоги комп'ютера: <span id="computerWins">0</span></span>
+    </div>
+    <div class="message" id="message">
+      Введіть своє ім'я, щоб почати гру!
+    </div>
+    
+
+    <div class="btn-container" id="btn-container">
+      <button id="startGame">Почати гру</button>
+    </div>
+
+    <div class="numbers-container" id="numbersContainer">
+    </div>
+  </div>
+
+  <script>
+    let userName = '';
+    let userWins = 0;
+    let computerWins = 0;
+    const maxWins = 3;
+    let gameRunning = false; 
+    const startButton = document.getElementById('startGame');
+    const btnContainer = document.getElementById('btn-container');
+    const userWinsSpan = document.getElementById('userWins');
+    const computerWinsSpan = document.getElementById('computerWins');
+    const messageDiv = document.getElementById('message');
+    const numbersContainer = document.getElementById('numbersContainer');
+    startButton.addEventListener('click', () => {
+      userName = prompt('Введіть ваше ім\'я:');
+      if (userName && userName.trim() !== '') {
+        startButton.style.display = 'none';
+        startGame();
+      } else {
+        messageDiv.textContent = 'Будь ласка, введіть коректне ім\'я.';
+      }
+    });
+
+    function startGame() {
+      userWins = 0;
+      computerWins = 0;
+      userWinsSpan.textContent = userWins;
+      computerWinsSpan.textContent = computerWins;
+      gameRunning = true;
+
+      messageDiv.textContent = `${userName}, гра почалась! Натискайте "Згенерувати нове число" для гри.`;
+
+      btnContainer.innerHTML = `
+        <button id="generateNumber">Згенерувати нове число</button>
+        <button id="endGame" class="reset-btn">Завершити гру</button>
+      `;
+
+      const generateButton = document.getElementById('generateNumber');
+      generateButton.addEventListener('click', generateNumbers);
+
+      const endButton = document.getElementById('endGame');
+      endButton.addEventListener('click', endGame);
+    }
+
+    function generateNumbers() {
+      if (!gameRunning) return;
+
+      const userNumber = Math.floor(Math.random() * 100) + 1;
+      const computerNumber = Math.floor(Math.random() * 100) + 1;
+
+      const userCircle = document.createElement('div');
+      userCircle.classList.add('number-circle');
+      userCircle.textContent = userNumber;
+
+      const computerCircle = document.createElement('div');
+      computerCircle.classList.add('number-circle');
+      computerCircle.textContent = computerNumber;
+
+      numbersContainer.innerHTML = '';
+      numbersContainer.appendChild(userCircle);
+      numbersContainer.appendChild(computerCircle);
+
+      setTimeout(() => {
+        userCircle.classList.add('visible');
+        computerCircle.classList.add('visible');
+      }, 100);
+
+      if (userNumber > computerNumber) {
+        userWins++;
+        messageDiv.textContent = `${userName} виграв цей раунд! (${userNumber} проти ${computerNumber})`;
+      } else if (computerNumber > userNumber) {
+        computerWins++;
+        messageDiv.textContent = `Комп'ютер виграв цей раунд! (${computerNumber} проти ${userNumber})`;
+      } else {
+        messageDiv.textContent = `Цей раунд закінчився внічию! (${userNumber} проти ${computerNumber})`;
+      }
+
+      userWinsSpan.textContent = userWins;
+      computerWinsSpan.textContent = computerWins;
+
+      if (userWins === maxWins) {
+        messageDiv.textContent = `${userName} виграв гру! Ви досягли ${maxWins} перемог.`;
+        endGame();
+      } else if (computerWins === maxWins) {
+        messageDiv.textContent = `Комп'ютер виграв гру! Він досяг ${maxWins} перемог.`;
+        endGame();
+      }
+    }
+
+    function endGame() {
+      gameRunning = false;
+
+      btnContainer.innerHTML = `
+        <button id="startGame">Почати гру</button>
+      `;
+      const startButton = document.getElementById('startGame');
+      startButton.addEventListener('click', () => {
+        location.reload();
+      });
+    }
+  </script>
+
+</body>
+</html>
